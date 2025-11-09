@@ -2,33 +2,27 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 require('dotenv').config();
+const cors = require('cors');
+
+const Stock = require('./models/Stock');
 
 const app = express();
 const port = process.env.PORT || 5000;
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
+app.use(cors({ origin: FRONTEND_ORIGIN }));
+
+app.use(express.json());
 
 app.use(bodyParser.json());
 
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.MONGODB_URI || process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+
   .then(() => {
     console.log('MongoDB connected');
   })
   .catch((err) => {
     console.error('MongoDB connection error:', err);
   });
-
-const stockSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    unique: true,
-    minlength: 1,
-    maxlength: 5,
-    uppercase: true,
-    match: /^[A-Z]{1,5}$/
-  }
-});
-
-const Stock = mongoose.model('Stock', stockSchema);
 
 app.get('/stocks', async (req, res) => {
   try {
@@ -57,6 +51,18 @@ app.post('/stocks', async (req, res) => {
     res.status(500).send('Server error');
   }
 });
+
+app.delete('/stocks/:name', async (req, res) => {
+  try {
+    const { name } = req.params;
+    const removed = await Stock.findOneAndDelete({ name: name.toUpperCase() });
+    if (!removed) return res.status(404).json({ msg: 'Stock not found' });
+    res.json({ msg: 'Stock removed' });
+  } catch (err) {
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);

@@ -1,9 +1,9 @@
+import Stock from './components/Stock';
 import React from 'react';
-import "./App.css";
-import Stock from './components/Stock.jsx'; 
-
+import './App.css';
 
 function App() {
+
   return (
      <React.Fragment>
       <Stock/>
