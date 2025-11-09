@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 require('dotenv').config();
 
+const Stock = require('./models/Stock');
+
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -15,20 +17,6 @@ mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTop
   .catch((err) => {
     console.error('MongoDB connection error:', err);
   });
-
-const stockSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    unique: true,
-    minlength: 1,
-    maxlength: 5,
-    uppercase: true,
-    match: /^[A-Z]{1,5}$/
-  }
-});
-
-const Stock = mongoose.model('Stock', stockSchema);
 
 app.get('/stocks', async (req, res) => {
   try {

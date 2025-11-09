@@ -1,36 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
+import axios from 'axios';
 
 function App() {
   const [stocks, setStocks] = useState([]);
   const [stockName, setStockName] = useState('');
-  const apiUrl = 'http://localhost:5000/stocks'; 
-
+  const apiUrl = 'http://localhost:5000/stocks';
 
   useEffect(() => {
     fetchStocks();
   }, []);
 
- 
   const fetchStocks = async () => {
     try {
-      const response = await fetch(apiUrl);
-      const data = await response.json();
-      if (response.ok) {
-        setStocks(data);
-      } else {
-        alert('Error fetching stocks');
-      }
+      const response = await axios.get(apiUrl);
+      setStocks(response.data);
     } catch (error) {
-      console.error('Error fetching stocks:', error);
+      alert('Error fetching stocks');
     }
   };
-
 
   const handleAddStock = async (e) => {
     e.preventDefault();
     const formattedStockName = stockName.toUpperCase().trim();
-
 
     if (formattedStockName.length < 1 || formattedStockName.length > 5) {
       alert('Stock name must be between 1 to 5 characters long.');
@@ -38,22 +30,11 @@ function App() {
     }
 
     try {
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name: formattedStockName }),
-      });
-
-      if (response.ok) {
-        setStockName('');
-        fetchStocks(); 
-      } else {
-        alert('Error adding stock');
-      }
+      await axios.post(apiUrl, { name: formattedStockName });
+      setStockName('');
+      fetchStocks();
     } catch (error) {
-      console.error('Error adding stock:', error);
+      alert('Error adding stock');
     }
   };
 
